@@ -88,6 +88,11 @@ async fn handle_request(
 
     debug!("Request: {} {} {:?}", method, uri, req.version());
 
+    let is_json = HttpParser::is_json_content(&headers);
+    let endpoint_pattern = HttpParser::extract_endpoint_pattern(&uri);
+
+    debug!("Endpoint pattern: {} (JSON: {})", endpoint_pattern, is_json);
+
     let request_data = HttpParser::parse_request(&method, &uri, &headers, None);
     let request_id = Uuid::new_v4().to_string();
 
