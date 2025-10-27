@@ -1,12 +1,29 @@
+//! SQL query parser and classifier
+//!
+//! Parses SQL queries and extracts table names, parameters, and query types.
+
 use crate::models::SqlQuery;
 use regex::Regex;
 use sqlparser::ast::Statement;
 use sqlparser::dialect::GenericDialect;
 use sqlparser::parser::Parser;
 
+/// SQL query parser
 pub struct SqlParser;
 
 impl SqlParser {
+    /// Parse a SQL query into a structured format
+    ///
+    /// # Examples
+    ///
+    /// ```
+    /// use chaos_testing::parsers::sql::SqlParser;
+    ///
+    /// let query = "SELECT * FROM users WHERE id = $1";
+    /// if let Some(parsed) = SqlParser::parse(query) {
+    ///     assert_eq!(parsed.params.len(), 1);
+    /// }
+    /// ```
     pub fn parse(query: &str) -> Option<SqlQuery> {
         let dialect = GenericDialect {};
 
@@ -20,6 +37,16 @@ impl SqlParser {
         }
     }
 
+    /// Classify a SQL query by its type
+    ///
+    /// # Examples
+    ///
+    /// ```
+    /// use chaos_testing::parsers::sql::{SqlParser, QueryType};
+    ///
+    /// assert_eq!(SqlParser::classify_query("SELECT * FROM users"), QueryType::Select);
+    /// assert_eq!(SqlParser::classify_query("INSERT INTO users VALUES (1)"), QueryType::Insert);
+    /// ```
     #[allow(clippy::if_same_then_else)]
     pub fn classify_query(query: &str) -> QueryType {
         let query_upper = query.trim().to_uppercase();
@@ -43,6 +70,16 @@ impl SqlParser {
         }
     }
 
+    /// Extract table names from a SQL query
+    ///
+    /// # Examples
+    ///
+    /// ```
+    /// use chaos_testing::parsers::sql::SqlParser;
+    ///
+    /// let tables = SqlParser::extract_table_names("SELECT * FROM users JOIN orders ON users.id = orders.user_id");
+    /// assert!(tables.contains(&"users".to_string()));
+    /// ```
     pub fn extract_table_names(query: &str) -> Vec<String> {
         let dialect = GenericDialect {};
 
@@ -89,6 +126,7 @@ impl SqlParser {
     }
 }
 
+/// SQL query classification types
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub enum QueryType {
     Select,

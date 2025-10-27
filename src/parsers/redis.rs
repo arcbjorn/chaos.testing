@@ -1,5 +1,10 @@
+//! Redis RESP protocol parser
+//!
+//! Parses Redis commands and classifies them by operation type.
+
 use crate::models::RedisCommand;
 
+/// Redis command parser
 pub struct RedisParser;
 
 impl RedisParser {
