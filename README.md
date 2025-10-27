@@ -87,7 +87,25 @@ Top Endpoints:
    Success Rate: 100.0%
 ```
 
-### 4. Run Chaos Tests
+### 4. Parse Queries
+
+Analyze SQL, Redis, PostgreSQL, or HTTP queries directly:
+
+```bash
+# Parse SQL query
+chaos-testing parse --query "SELECT * FROM users WHERE id = 1" --protocol sql
+
+# Parse Redis command
+chaos-testing parse --query "GET mykey" --protocol redis
+
+# Parse PostgreSQL query
+chaos-testing parse --query "SELECT name FROM products" --protocol postgres
+
+# Analyze HTTP endpoint
+chaos-testing parse --query "/api/users/123?active=true" --protocol http
+```
+
+### 5. Run Chaos Tests
 
 ```bash
 chaos-testing chaos --input my-app.db --url http://localhost:9000 --level extreme
@@ -98,7 +116,7 @@ Injects failures:
 - Simulated timeouts
 - Connection errors
 
-### 5. Run Generated Tests
+### 6. Run Generated Tests
 
 ```bash
 # Python
