@@ -1,11 +1,9 @@
 use crate::models::SqlQuery;
 
-#[allow(dead_code)]
 pub struct PostgresParser;
 
 impl PostgresParser {
     /// Parse PostgreSQL wire protocol message
-    #[allow(dead_code)]
     pub fn parse_simple_query(data: &[u8]) -> Option<SqlQuery> {
         if data.len() < 5 {
             return None;
@@ -34,7 +32,6 @@ impl PostgresParser {
     }
 
     /// Parse prepared statement (Parse message)
-    #[allow(dead_code)]
     pub fn parse_prepared_statement(data: &[u8]) -> Option<(String, SqlQuery)> {
         if data.len() < 5 || data[0] != b'P' {
             return None;
@@ -58,7 +55,6 @@ impl PostgresParser {
         ))
     }
 
-    #[allow(dead_code)]
     pub fn message_type(data: &[u8]) -> Option<PostgresMessageType> {
         if data.is_empty() {
             return None;
@@ -77,14 +73,12 @@ impl PostgresParser {
         })
     }
 
-    #[allow(dead_code)]
     pub fn extract_table_names(query: &str) -> Vec<String> {
         use crate::parsers::sql::SqlParser;
         SqlParser::extract_table_names(query)
     }
 }
 
-#[allow(dead_code)]
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub enum PostgresMessageType {
     SimpleQuery,

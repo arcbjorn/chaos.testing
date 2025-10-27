@@ -2,7 +2,6 @@ use crate::models::{RequestData, ResponseData};
 use hyper::{HeaderMap, Method, Uri};
 use std::collections::HashMap;
 
-#[allow(dead_code)]
 pub struct HttpParser;
 
 impl HttpParser {
@@ -24,7 +23,6 @@ impl HttpParser {
         }
     }
 
-    #[allow(dead_code)]
     pub fn parse_response(
         status_code: u16,
         headers: &HeaderMap,
@@ -60,7 +58,6 @@ impl HttpParser {
             .unwrap_or_default()
     }
 
-    #[allow(dead_code)]
     pub fn is_json_content(headers: &HeaderMap) -> bool {
         headers
             .get("content-type")
@@ -69,7 +66,6 @@ impl HttpParser {
             .unwrap_or(false)
     }
 
-    #[allow(dead_code)]
     pub fn extract_endpoint_pattern(uri: &Uri) -> String {
         let path = uri.path();
 

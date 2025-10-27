@@ -1,11 +1,9 @@
 use crate::models::RedisCommand;
 
-#[allow(dead_code)]
 pub struct RedisParser;
 
 impl RedisParser {
     /// Parse RESP (Redis Serialization Protocol)
-    #[allow(dead_code)]
     pub fn parse(data: &[u8]) -> Option<RedisCommand> {
         if data.is_empty() {
             return None;
@@ -64,7 +62,6 @@ impl RedisParser {
         Some(lines[1].to_string())
     }
 
-    #[allow(dead_code)]
     pub fn classify_command(command: &str) -> RedisCommandType {
         match command.to_uppercase().as_str() {
             "GET" | "MGET" | "HGET" | "HGETALL" | "LRANGE" | "SMEMBERS" | "ZRANGE" => {
@@ -81,7 +78,6 @@ impl RedisParser {
         }
     }
 
-    #[allow(dead_code)]
     pub fn is_read_only(command: &str) -> bool {
         matches!(
             Self::classify_command(command),
@@ -90,7 +86,6 @@ impl RedisParser {
     }
 }
 
-#[allow(dead_code)]
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub enum RedisCommandType {
     Read,
