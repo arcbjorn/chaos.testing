@@ -36,6 +36,9 @@ enum Commands {
 
         #[arg(short, long, default_value = "chaos-capture.db")]
         output: String,
+
+        #[arg(short, long)]
+        target: Option<String>,
     },
 
     /// Generate tests from captured traffic
@@ -95,6 +98,7 @@ async fn main() -> Result<()> {
             port,
             duration,
             output,
+            target,
         } => {
             if let Some(pid) = pid {
                 info!("Observing process {} for {}", pid, duration);
@@ -104,7 +108,10 @@ async fn main() -> Result<()> {
                 info!("Intercepting traffic on port {} for {}", port, duration);
                 info!("Output: {}", output);
 
-                let interceptor = interceptor::HttpInterceptor::new(port, output);
+                let mut interceptor = interceptor::HttpInterceptor::new(port, output);
+                if let Some(target_url) = target {
+                    interceptor = interceptor.with_target(target_url);
+                }
                 interceptor.start().await?;
             } else {
                 anyhow::bail!("Either --pid or --port must be specified");
