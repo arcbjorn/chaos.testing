@@ -5,6 +5,7 @@ pub struct RedisParser;
 
 impl RedisParser {
     /// Parse RESP (Redis Serialization Protocol)
+    #[allow(dead_code)]
     pub fn parse(data: &[u8]) -> Option<RedisCommand> {
         if data.is_empty() {
             return None;
@@ -21,6 +22,7 @@ impl RedisParser {
         }
     }
 
+    #[allow(dead_code)]
     fn parse_array(data: &[u8]) -> Option<RedisCommand> {
         let lines: Vec<&[u8]> = data.split(|&b| b == b'\n').collect();
         if lines.is_empty() {
@@ -52,6 +54,7 @@ impl RedisParser {
         })
     }
 
+    #[allow(dead_code)]
     fn parse_bulk_string(data: &[u8]) -> Option<String> {
         let s = std::str::from_utf8(data).ok()?;
         let lines: Vec<&str> = s.lines().collect();
@@ -61,6 +64,7 @@ impl RedisParser {
         Some(lines[1].to_string())
     }
 
+    #[allow(dead_code)]
     pub fn classify_command(command: &str) -> RedisCommandType {
         match command.to_uppercase().as_str() {
             "GET" | "MGET" | "HGET" | "HGETALL" | "LRANGE" | "SMEMBERS" | "ZRANGE" => {
@@ -77,6 +81,7 @@ impl RedisParser {
         }
     }
 
+    #[allow(dead_code)]
     pub fn is_read_only(command: &str) -> bool {
         matches!(
             Self::classify_command(command),
@@ -85,6 +90,7 @@ impl RedisParser {
     }
 }
 
+#[allow(dead_code)]
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub enum RedisCommandType {
     Read,

@@ -8,6 +8,7 @@ use sqlparser::parser::Parser;
 pub struct SqlParser;
 
 impl SqlParser {
+    #[allow(dead_code)]
     pub fn parse(query: &str) -> Option<SqlQuery> {
         let dialect = GenericDialect {};
 
@@ -21,6 +22,8 @@ impl SqlParser {
         }
     }
 
+    #[allow(dead_code)]
+    #[allow(clippy::if_same_then_else)]
     pub fn classify_query(query: &str) -> QueryType {
         let query_upper = query.trim().to_uppercase();
 
@@ -43,6 +46,7 @@ impl SqlParser {
         }
     }
 
+    #[allow(dead_code)]
     pub fn extract_table_names(query: &str) -> Vec<String> {
         let dialect = GenericDialect {};
 
@@ -79,6 +83,7 @@ impl SqlParser {
         }
     }
 
+    #[allow(dead_code)]
     fn extract_params(query: &str) -> Vec<String> {
         let param_regex = Regex::new(r"\$\d+|\?|:\w+").unwrap();
         param_regex
@@ -88,6 +93,7 @@ impl SqlParser {
     }
 }
 
+#[allow(dead_code)]
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub enum QueryType {
     Select,

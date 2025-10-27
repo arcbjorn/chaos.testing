@@ -136,6 +136,7 @@ impl Storage {
         Ok(result)
     }
 
+    #[allow(clippy::too_many_arguments)]
     fn deserialize_request(
         &self,
         id: String,
@@ -192,6 +193,7 @@ impl Storage {
         })
     }
 
+    #[allow(dead_code)]
     pub fn count_requests(&self) -> Result<i64> {
         let conn = self.conn.lock().unwrap();
         let count: i64 = conn.query_row("SELECT COUNT(*) FROM requests", [], |row| row.get(0))?;
