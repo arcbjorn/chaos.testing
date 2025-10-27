@@ -2,6 +2,15 @@
 name = "chaos-testing"
 version = "0.1.0"
 edition = "2024"
+authors = ["Chaos Testing Contributors"]
+description = "Language-agnostic backend testing framework using network-level interception"
+license = "MIT OR Apache-2.0"
+repository = "https://github.com/chaos-testing/chaos-testing"
+homepage = "https://github.com/chaos-testing/chaos-testing"
+documentation = "https://docs.rs/chaos-testing"
+readme = "README.md"
+keywords = ["testing", "chaos", "network", "interceptor", "backend"]
+categories = ["development-tools::testing", "network-programming"]
 
 [lib]
 name = "chaos_testing"
