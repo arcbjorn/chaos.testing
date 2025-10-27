@@ -127,12 +127,12 @@ Works with **ANY** language because it intercepts at the network level:
 
 ## Features
 
-- ✅ Zero configuration - point and observe
-- ✅ Language agnostic - works with compiled & interpreted languages
-- ✅ Discovers actual behavior - not what code says, what it DOES
-- ✅ Protocol-aware - HTTP, SQL, Redis, Kafka, gRPC
-- ✅ Chaos engineering - inject failures at network level
-- ✅ Works with closed source - no code access needed
+- Zero configuration - point and observe
+- Language agnostic - works with compiled & interpreted languages
+- Discovers actual behavior - not what code says, what it DOES
+- Protocol-aware - HTTP, SQL, Redis, Kafka, gRPC
+- Chaos engineering - inject failures at network level
+- Works with closed source - no code access needed
 
 ## Architecture
 
@@ -162,29 +162,39 @@ Works with **ANY** language because it intercepts at the network level:
 ```
 chaos-testing/
 ├── src/
+│   ├── main.rs           # CLI entry point
 │   ├── interceptor.rs    # HTTP proxy server
-│   ├── parsers/          # Protocol parsers (HTTP, SQL)
 │   ├── storage.rs        # SQLite persistence
+│   ├── analyzer.rs       # Traffic analysis
+│   ├── chaos.rs          # Chaos engine
+│   ├── error.rs          # Error types
 │   ├── models.rs         # Data structures
-│   ├── generators/       # Test code generators
-│   │   ├── python.rs
-│   │   ├── go.rs
-│   │   └── rust_gen.rs
-│   └── main.rs           # CLI entry point
+│   ├── parsers/          # Protocol parsers
+│   │   ├── http.rs
+│   │   ├── sql.rs
+│   │   ├── redis.rs
+│   │   └── postgres.rs
+│   └── generators/       # Test code generators
+│       ├── python.rs
+│       ├── go.rs
+│       └── rust_gen.rs
+└── examples/
+    ├── demo-api.py       # Demo FastAPI backend
+    └── test-traffic.sh   # Traffic generator
 ```
 
 ## Features Implemented
 
-- ✅ HTTP traffic interception with proxy forwarding
-- ✅ SQLite storage for captured requests
-- ✅ HTTP/SQL/Redis/PostgreSQL protocol parsing
-- ✅ Test generation for Python/Go/Rust
-- ✅ **Analyze command** - traffic statistics and insights
-- ✅ **Chaos engine** - replay with failure injection
+- HTTP traffic interception with proxy forwarding
+- SQLite storage for captured requests
+- HTTP/SQL/Redis/PostgreSQL protocol parsing
+- Test generation for Python/Go/Rust
+- **Analyze command** - traffic statistics and insights
+- **Chaos engine** - replay with failure injection
   - Network delays
   - Timeouts
   - Connection failures
-- ✅ Clean conventional commits (26 total)
+- Clean conventional commits (27 total)
 
 ## Demo
 
@@ -200,15 +210,49 @@ chaos-testing generate --language python  # Generate tests
 
 Full instructions: [examples/README.md](examples/README.md)
 
+## Commands
+
+### Observe
+Capture traffic through a proxy:
+```bash
+chaos-testing observe --port <PORT> --target <URL> [--output <FILE>]
+```
+
+### Generate
+Generate tests from captures:
+```bash
+chaos-testing generate --input <FILE> --language <LANG> [--framework <FW>] [--output <DIR>]
+```
+
+### Analyze
+Analyze captured traffic:
+```bash
+chaos-testing analyze --input <FILE>
+```
+
+### Chaos
+Run chaos tests:
+```bash
+chaos-testing chaos --input <FILE> --url <URL> [--level <LEVEL>]
+```
+Levels: `mild` (5% failure), `moderate` (15%), `extreme` (30%)
+
 ## Development
 
 ```bash
 # Build
 cargo build --release
 
-# Run
-cargo run -- observe --port 8080 --target http://localhost:9000
+# Run with verbose logging
+cargo run -- observe --port 8080 --target http://localhost:9000 --verbose
 
-# Test
-cargo test
+# Run clippy
+cargo clippy --all-targets
+
+# Format code
+cargo fmt
 ```
+
+## License
+
+MIT OR Apache-2.0
