@@ -201,7 +201,9 @@ async fn main() -> Result<()> {
         }
 
         Commands::Parse { query, protocol } => {
+            use parsers::grpc::GrpcParser;
             use parsers::http::HttpParser;
+            use parsers::kafka::KafkaParser;
             use parsers::postgres::PostgresParser;
             use parsers::redis::RedisParser;
             use parsers::sql::SqlParser;
@@ -286,9 +288,50 @@ async fn main() -> Result<()> {
                     let response = HttpParser::parse_response(200, &headers, None);
                     println!("  Response Status: {}", response.status_code);
                 }
+                "kafka" => {
+                    println!("Kafka Topic Analysis:");
+                    if let Some(topic) = KafkaParser::extract_topic(&query) {
+                        println!("  Topic: {}", topic);
+                        let msg_type = KafkaParser::classify_by_topic(&topic);
+                        println!("  Type: {:?}", msg_type);
+                    } else {
+                        let msg_type = KafkaParser::classify_by_topic(&query);
+                        println!("  Topic: {}", query);
+                        println!("  Type: {:?}", msg_type);
+                    }
+
+                    let msg =
+                        KafkaParser::parse_message(&query, 0, 0, None, Some(b"data".to_vec()));
+                    println!("  Topic: {}", msg.topic);
+                    println!("  Partition: {}", msg.partition);
+                    println!("  Offset: {}", msg.offset);
+                    println!("  Key: {:?}", msg.key);
+                    println!(
+                        "  Value size: {} bytes",
+                        msg.value.as_ref().map(|v| v.len()).unwrap_or(0)
+                    );
+                }
+                "grpc" => {
+                    println!("gRPC Service Analysis:");
+                    if let Some((service, method)) = GrpcParser::parse_service_path(&query) {
+                        println!("  Service: {}", service);
+                        println!("  Method: {}", method);
+
+                        if let Some(pkg) = GrpcParser::extract_package(&service) {
+                            println!("  Package: {}", pkg);
+                        }
+
+                        let method_type = GrpcParser::classify_method(&method);
+                        println!("  Type: {:?}", method_type);
+                        println!("  Streaming: {}", GrpcParser::is_streaming(&method));
+                    } else {
+                        println!("  Invalid gRPC path format");
+                        println!("  Expected: /package.Service/Method");
+                    }
+                }
                 _ => {
                     println!("Unknown protocol: {}", protocol);
-                    println!("Supported: sql, redis, postgres, http");
+                    println!("Supported: sql, redis, postgres, http, kafka, grpc");
                 }
             }
         }

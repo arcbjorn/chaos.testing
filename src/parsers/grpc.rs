@@ -3,6 +3,7 @@
 //! Parses gRPC requests and extracts service, method, and metadata.
 
 /// gRPC request representation
+#[allow(dead_code)]
 #[derive(Debug, Clone)]
 pub struct GrpcRequest {
     pub service: String,
