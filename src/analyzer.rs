@@ -1,3 +1,4 @@
+use crate::models::{BehaviorPattern, Dependency, DependencyType};
 use crate::storage::Storage;
 use anyhow::Result;
 use std::collections::HashMap;
@@ -9,6 +10,89 @@ pub struct Analyzer {
 impl Analyzer {
     pub fn new(storage: Storage) -> Self {
         Self { storage }
+    }
+
+    pub fn analyze_behavior_patterns(&self) -> Result<Vec<BehaviorPattern>> {
+        let requests = self.storage.get_all_requests()?;
+        let mut patterns = Vec::new();
+        let mut endpoint_map: HashMap<String, Vec<&crate::models::CapturedRequest>> =
+            HashMap::new();
+
+        for req in &requests {
+            let key = format!("{} {}", req.request.method, req.request.uri);
+            endpoint_map.entry(key).or_default().push(req);
+        }
+
+        for (endpoint_key, reqs) in endpoint_map {
+            let parts: Vec<&str> = endpoint_key.split(' ').collect();
+            let method = parts[0].to_string();
+            let endpoint = parts[1].to_string();
+
+            let request_count = reqs.len() as u64;
+            let total_duration: u64 = reqs.iter().filter_map(|r| r.duration_ms).sum();
+            let avg_duration_ms = if request_count > 0 {
+                total_duration as f64 / request_count as f64
+            } else {
+                0.0
+            };
+
+            let success_count = reqs
+                .iter()
+                .filter(|r| {
+                    r.response
+                        .as_ref()
+                        .map(|resp| resp.status_code < 400)
+                        .unwrap_or(false)
+                })
+                .count();
+            let success_rate = (success_count as f64 / request_count as f64) * 100.0;
+
+            let dependencies = self.infer_dependencies(&reqs);
+
+            patterns.push(BehaviorPattern {
+                endpoint,
+                method,
+                request_count,
+                avg_duration_ms,
+                success_rate,
+                dependencies,
+            });
+        }
+
+        patterns.sort_by(|a, b| b.request_count.cmp(&a.request_count));
+        Ok(patterns)
+    }
+
+    fn infer_dependencies(&self, requests: &[&crate::models::CapturedRequest]) -> Vec<Dependency> {
+        let mut deps = Vec::new();
+
+        for req in requests {
+            if req.request.uri.contains("/users") || req.request.uri.contains("/products") {
+                deps.push(Dependency {
+                    dep_type: DependencyType::Database,
+                    target: "database".to_string(),
+                    call_count: 1,
+                });
+            }
+
+            if req.request.uri.contains("/cache") {
+                deps.push(Dependency {
+                    dep_type: DependencyType::Cache,
+                    target: "redis".to_string(),
+                    call_count: 1,
+                });
+            }
+        }
+
+        let mut aggregated: HashMap<String, Dependency> = HashMap::new();
+        for dep in deps {
+            aggregated
+                .entry(dep.target.clone())
+                .and_modify(|e| e.call_count += dep.call_count)
+                .or_insert(dep);
+        }
+
+        aggregated.into_values().collect()
     }
 
     pub fn analyze(&self) -> Result<AnalysisReport> {
@@ -90,6 +174,8 @@ impl Analyzer {
         let mut endpoints: Vec<EndpointStats> = endpoint_stats.into_values().collect();
         endpoints.sort_by(|a, b| b.count.cmp(&a.count));
 
+        let behavior_patterns = self.analyze_behavior_patterns().unwrap_or_default();
+
         Ok(AnalysisReport {
             total_requests,
             unique_endpoints: endpoints.len(),
@@ -99,6 +185,7 @@ impl Analyzer {
             status_codes,
             methods,
             endpoints,
+            behavior_patterns,
         })
     }
 }
@@ -113,6 +200,7 @@ pub struct AnalysisReport {
     pub status_codes: HashMap<u16, usize>,
     pub methods: HashMap<String, usize>,
     pub endpoints: Vec<EndpointStats>,
+    pub behavior_patterns: Vec<BehaviorPattern>,
 }
 
 #[derive(Debug)]
@@ -172,6 +260,32 @@ impl AnalysisReport {
                 stats.avg_duration_ms, stats.min_duration_ms, stats.max_duration_ms
             );
             println!("   Success Rate: {:.1}%", stats.success_rate);
+        }
+
+        if !self.behavior_patterns.is_empty() {
+            println!("\nBehavior Patterns:");
+            for (i, pattern) in self.behavior_patterns.iter().take(5).enumerate() {
+                println!(
+                    "\n{}. {} {} ({} requests)",
+                    i + 1,
+                    pattern.method,
+                    pattern.endpoint,
+                    pattern.request_count
+                );
+                println!(
+                    "   Avg Duration: {:.2}ms | Success Rate: {:.1}%",
+                    pattern.avg_duration_ms, pattern.success_rate
+                );
+                if !pattern.dependencies.is_empty() {
+                    println!("   Dependencies:");
+                    for dep in &pattern.dependencies {
+                        println!(
+                            "     - {:?}: {} ({} calls)",
+                            dep.dep_type, dep.target, dep.call_count
+                        );
+                    }
+                }
+            }
         }
 
         println!("\n");
