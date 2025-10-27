@@ -3,6 +3,8 @@ use clap::{Parser, Subcommand};
 use tracing::{info, Level};
 use tracing_subscriber;
 
+mod analyzer;
+mod chaos;
 mod generators;
 mod interceptor;
 mod models;
@@ -124,7 +126,6 @@ async fn main() -> Result<()> {
             framework,
             output,
         } => {
-            use generators::TestGenerator;
             use std::fs;
 
             info!("Generating tests from {}", input);
@@ -155,12 +156,23 @@ async fn main() -> Result<()> {
             info!("Running chaos testing at {} level", level);
             info!("Using capture: {}", input);
             info!("Target: {}", url);
-            println!("Chaos testing not yet implemented");
+
+            let storage = storage::Storage::new(&input)?;
+            let chaos_level = chaos::ChaosLevel::from_str(&level);
+            let engine = chaos::ChaosEngine::new(storage, chaos_level, url);
+
+            let report = engine.run_chaos_tests().await?;
+            report.print();
         }
 
         Commands::Analyze { input } => {
             info!("Analyzing captured traffic from {}", input);
-            println!("Traffic analysis not yet implemented");
+
+            let storage = storage::Storage::new(&input)?;
+            let analyzer = analyzer::Analyzer::new(storage);
+            let report = analyzer.analyze()?;
+
+            report.print();
         }
     }
 
