@@ -9,6 +9,7 @@ mod interceptor;
 mod models;
 mod parsers;
 mod storage;
+mod utils;
 
 #[derive(Parser)]
 #[command(name = "chaos-testing")]
@@ -172,6 +173,18 @@ async fn main() -> Result<()> {
             info!("Analyzing captured traffic from {}", input);
 
             let storage = storage::Storage::new(&input)?;
+
+            let total = storage.count_requests()?;
+            info!("Total requests in database: {}", total);
+
+            let endpoints = storage.get_unique_endpoints()?;
+            info!("Found {} unique endpoints", endpoints.len());
+
+            for endpoint in endpoints.iter().take(3) {
+                let endpoint_requests = storage.get_requests_by_endpoint(endpoint)?;
+                info!("  {}: {} requests", endpoint, endpoint_requests.len());
+            }
+
             let analyzer = analyzer::Analyzer::new(storage);
             let report = analyzer.analyze()?;
 
