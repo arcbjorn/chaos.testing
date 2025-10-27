@@ -46,7 +46,6 @@ pub struct SqlQuery {
     pub database: Option<String>,
 }
 
-#[allow(dead_code)]
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct RedisCommand {
     pub command: String,
@@ -54,7 +53,6 @@ pub struct RedisCommand {
     pub database: u8,
 }
 
-#[allow(dead_code)]
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct BehaviorPattern {
     pub endpoint: String,
@@ -65,7 +63,6 @@ pub struct BehaviorPattern {
     pub dependencies: Vec<Dependency>,
 }
 
-#[allow(dead_code)]
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct Dependency {
     pub dep_type: DependencyType,
@@ -73,7 +70,6 @@ pub struct Dependency {
     pub call_count: u64,
 }
 
-#[allow(dead_code)]
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub enum DependencyType {
     Database,
