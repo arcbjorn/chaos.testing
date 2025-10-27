@@ -12,13 +12,11 @@ impl SqlParser {
         let dialect = GenericDialect {};
 
         match Parser::parse_sql(&dialect, query) {
-            Ok(statements) if !statements.is_empty() => {
-                Some(SqlQuery {
-                    query: query.to_string(),
-                    params: Self::extract_params(query),
-                    database: None,
-                })
-            }
+            Ok(statements) if !statements.is_empty() => Some(SqlQuery {
+                query: query.to_string(),
+                params: Self::extract_params(query),
+                database: None,
+            }),
             _ => None,
         }
     }
@@ -49,12 +47,10 @@ impl SqlParser {
         let dialect = GenericDialect {};
 
         match Parser::parse_sql(&dialect, query) {
-            Ok(statements) => {
-                statements
-                    .into_iter()
-                    .flat_map(|stmt| Self::tables_from_statement(&stmt))
-                    .collect()
-            }
+            Ok(statements) => statements
+                .into_iter()
+                .flat_map(|stmt| Self::tables_from_statement(&stmt))
+                .collect(),
             Err(_) => Vec::new(),
         }
     }
@@ -78,9 +74,7 @@ impl SqlParser {
             Statement::Update { table, .. } => {
                 vec![table.to_string()]
             }
-            Statement::Delete(delete) => {
-                delete.tables.iter().map(|t| t.to_string()).collect()
-            }
+            Statement::Delete(delete) => delete.tables.iter().map(|t| t.to_string()).collect(),
             _ => Vec::new(),
         }
     }

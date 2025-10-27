@@ -103,7 +103,10 @@ mod tests {
     #[test]
     fn test_classify_commands() {
         assert_eq!(RedisParser::classify_command("GET"), RedisCommandType::Read);
-        assert_eq!(RedisParser::classify_command("SET"), RedisCommandType::Write);
+        assert_eq!(
+            RedisParser::classify_command("SET"),
+            RedisCommandType::Write
+        );
         assert!(RedisParser::is_read_only("GET"));
         assert!(!RedisParser::is_read_only("SET"));
     }

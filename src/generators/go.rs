@@ -10,7 +10,10 @@ impl GoGenerator {
         Self
     }
 
-    fn group_by_endpoint<'a>(&self, requests: &'a [CapturedRequest]) -> HashMap<String, Vec<&'a CapturedRequest>> {
+    fn group_by_endpoint<'a>(
+        &self,
+        requests: &'a [CapturedRequest],
+    ) -> HashMap<String, Vec<&'a CapturedRequest>> {
         let mut grouped: HashMap<String, Vec<&'a CapturedRequest>> = HashMap::new();
 
         for req in requests {
@@ -96,7 +99,9 @@ impl TestGenerator for GoGenerator {
             output.push_str("}\n\n");
         }
 
-        if output == "package main\n\nimport (\n\t\"net/http\"\n\t\"testing\"\n)\n\nconst baseURL = \"http://localhost:8080\"\n\n" {
+        if output
+            == "package main\n\nimport (\n\t\"net/http\"\n\t\"testing\"\n)\n\nconst baseURL = \"http://localhost:8080\"\n\n"
+        {
             output.push_str("// No requests captured\n");
         }
 

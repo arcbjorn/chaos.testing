@@ -1,5 +1,5 @@
-pub mod python;
 pub mod go;
+pub mod python;
 pub mod rust_gen;
 
 use crate::models::CapturedRequest;

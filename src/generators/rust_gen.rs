@@ -10,7 +10,10 @@ impl RustGenerator {
         Self
     }
 
-    fn group_by_endpoint<'a>(&self, requests: &'a [CapturedRequest]) -> HashMap<String, Vec<&'a CapturedRequest>> {
+    fn group_by_endpoint<'a>(
+        &self,
+        requests: &'a [CapturedRequest],
+    ) -> HashMap<String, Vec<&'a CapturedRequest>> {
         let mut grouped: HashMap<String, Vec<&'a CapturedRequest>> = HashMap::new();
 
         for req in requests {
@@ -79,7 +82,10 @@ impl TestGenerator for RustGenerator {
                 output.push_str("        assert!(response.status().as_u16() < 500);\n");
             }
 
-            output.push_str(&format!("        // Called {} times in capture\n", reqs.len()));
+            output.push_str(&format!(
+                "        // Called {} times in capture\n",
+                reqs.len()
+            ));
             output.push_str("    }\n\n");
         }
 

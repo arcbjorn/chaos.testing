@@ -39,12 +39,7 @@ impl HttpParser {
     fn headers_to_map(headers: &HeaderMap) -> HashMap<String, String> {
         headers
             .iter()
-            .map(|(k, v)| {
-                (
-                    k.as_str().to_string(),
-                    v.to_str().unwrap_or("").to_string(),
-                )
-            })
+            .map(|(k, v)| (k.as_str().to_string(), v.to_str().unwrap_or("").to_string()))
             .collect()
     }
 
@@ -79,7 +74,9 @@ impl HttpParser {
             .map(|segment| {
                 if segment.chars().all(|c| c.is_numeric()) {
                     "{id}"
-                } else if segment.len() > 20 && segment.chars().all(|c| c.is_alphanumeric() || c == '-') {
+                } else if segment.len() > 20
+                    && segment.chars().all(|c| c.is_alphanumeric() || c == '-')
+                {
                     "{uuid}"
                 } else {
                     segment

@@ -76,8 +76,13 @@ impl ChaosEngine {
         };
 
         for (i, request) in requests.iter().enumerate() {
-            info!("Test {}/{}: {} {}", i + 1, requests.len(),
-                request.request.method, request.request.uri);
+            info!(
+                "Test {}/{}: {} {}",
+                i + 1,
+                requests.len(),
+                request.request.method,
+                request.request.uri
+            );
 
             let should_inject = self.should_inject_chaos();
 
@@ -87,8 +92,10 @@ impl ChaosEngine {
                     Ok(_) => report.passed += 1,
                     Err(e) => {
                         report.failed += 1;
-                        report.errors.push(format!("{} {}: {}",
-                            request.request.method, request.request.uri, e));
+                        report.errors.push(format!(
+                            "{} {}: {}",
+                            request.request.method, request.request.uri, e
+                        ));
                     }
                 }
             } else {
@@ -96,8 +103,10 @@ impl ChaosEngine {
                     Ok(_) => report.passed += 1,
                     Err(e) => {
                         report.failed += 1;
-                        report.errors.push(format!("{} {}: {}",
-                            request.request.method, request.request.uri, e));
+                        report.errors.push(format!(
+                            "{} {}: {}",
+                            request.request.method, request.request.uri, e
+                        ));
                     }
                 }
             }
@@ -136,9 +145,7 @@ impl ChaosEngine {
                 warn!("Injecting timeout");
                 report.timeouts += 1;
                 let short_timeout = Duration::from_millis(1);
-                let short_client = reqwest::Client::builder()
-                    .timeout(short_timeout)
-                    .build()?;
+                let short_client = reqwest::Client::builder().timeout(short_timeout).build()?;
                 self.replay_normal(&short_client, request).await
             }
             _ => {
@@ -172,13 +179,14 @@ impl ChaosEngine {
         let status = response.status();
 
         if let Some(expected_response) = &request.response
-            && status.as_u16() != expected_response.status_code {
-                anyhow::bail!(
-                    "Status mismatch: expected {}, got {}",
-                    expected_response.status_code,
-                    status.as_u16()
-                );
-            }
+            && status.as_u16() != expected_response.status_code
+        {
+            anyhow::bail!(
+                "Status mismatch: expected {}, got {}",
+                expected_response.status_code,
+                status.as_u16()
+            );
+        }
 
         Ok(())
     }
@@ -197,10 +205,16 @@ impl ChaosReport {
     pub fn print(&self) {
         println!("\n=== Chaos Testing Report ===\n");
         println!("Total Tests: {}", self.total_tests);
-        println!("Passed: {} ({:.1}%)", self.passed,
-            (self.passed as f64 / self.total_tests as f64) * 100.0);
-        println!("Failed: {} ({:.1}%)", self.failed,
-            (self.failed as f64 / self.total_tests as f64) * 100.0);
+        println!(
+            "Passed: {} ({:.1}%)",
+            self.passed,
+            (self.passed as f64 / self.total_tests as f64) * 100.0
+        );
+        println!(
+            "Failed: {} ({:.1}%)",
+            self.failed,
+            (self.failed as f64 / self.total_tests as f64) * 100.0
+        );
         println!("Chaos Injected: {}", self.chaos_injected);
         println!("Timeouts: {}", self.timeouts);
 

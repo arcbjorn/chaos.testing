@@ -1,6 +1,6 @@
 use anyhow::Result;
 use clap::{Parser, Subcommand};
-use tracing::{info, Level};
+use tracing::{Level, info};
 
 mod analyzer;
 mod chaos;
@@ -128,7 +128,11 @@ async fn main() -> Result<()> {
             use std::fs;
 
             info!("Generating tests from {}", input);
-            info!("Target: {} ({})", language, framework.as_deref().unwrap_or("auto"));
+            info!(
+                "Target: {} ({})",
+                language,
+                framework.as_deref().unwrap_or("auto")
+            );
 
             let storage = storage::Storage::new(&input)?;
             let requests = storage.get_all_requests()?;

@@ -27,15 +27,17 @@ impl Analyzer {
         for req in &requests {
             let endpoint = format!("{} {}", req.request.method, req.request.uri);
 
-            let stats = endpoint_stats.entry(endpoint.clone()).or_insert(EndpointStats {
-                endpoint,
-                count: 0,
-                avg_duration_ms: 0.0,
-                min_duration_ms: u64::MAX,
-                max_duration_ms: 0,
-                success_rate: 0.0,
-                success_count: 0,
-            });
+            let stats = endpoint_stats
+                .entry(endpoint.clone())
+                .or_insert(EndpointStats {
+                    endpoint,
+                    count: 0,
+                    avg_duration_ms: 0.0,
+                    min_duration_ms: u64::MAX,
+                    max_duration_ms: 0,
+                    success_rate: 0.0,
+                    success_count: 0,
+                });
 
             stats.count += 1;
 
@@ -132,10 +134,16 @@ impl AnalysisReport {
         println!("  Total Requests: {}", self.total_requests);
         println!("  Unique Endpoints: {}", self.unique_endpoints);
         println!("  Avg Response Time: {:.2}ms", self.avg_response_time_ms);
-        println!("  Success: {} ({:.1}%)", self.success_count,
-            (self.success_count as f64 / self.total_requests as f64) * 100.0);
-        println!("  Errors: {} ({:.1}%)", self.error_count,
-            (self.error_count as f64 / self.total_requests as f64) * 100.0);
+        println!(
+            "  Success: {} ({:.1}%)",
+            self.success_count,
+            (self.success_count as f64 / self.total_requests as f64) * 100.0
+        );
+        println!(
+            "  Errors: {} ({:.1}%)",
+            self.error_count,
+            (self.error_count as f64 / self.total_requests as f64) * 100.0
+        );
 
         println!("\nHTTP Methods:");
         let mut methods: Vec<_> = self.methods.iter().collect();
@@ -153,9 +161,16 @@ impl AnalysisReport {
 
         println!("\nTop Endpoints:");
         for (i, stats) in self.endpoints.iter().take(10).enumerate() {
-            println!("\n{}. {} (called {} times)", i + 1, stats.endpoint, stats.count);
-            println!("   Avg: {:.2}ms | Min: {}ms | Max: {}ms",
-                stats.avg_duration_ms, stats.min_duration_ms, stats.max_duration_ms);
+            println!(
+                "\n{}. {} (called {} times)",
+                i + 1,
+                stats.endpoint,
+                stats.count
+            );
+            println!(
+                "   Avg: {:.2}ms | Min: {}ms | Max: {}ms",
+                stats.avg_duration_ms, stats.min_duration_ms, stats.max_duration_ms
+            );
             println!("   Success Rate: {:.1}%", stats.success_rate);
         }
 

@@ -3,7 +3,6 @@ use serde::{Deserialize, Serialize};
 use std::collections::HashMap;
 
 #[allow(dead_code)]
-
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct CapturedRequest {
     pub id: String,

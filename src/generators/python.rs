@@ -10,7 +10,10 @@ impl PythonGenerator {
         Self
     }
 
-    fn group_by_endpoint<'a>(&self, requests: &'a [CapturedRequest]) -> HashMap<String, Vec<&'a CapturedRequest>> {
+    fn group_by_endpoint<'a>(
+        &self,
+        requests: &'a [CapturedRequest],
+    ) -> HashMap<String, Vec<&'a CapturedRequest>> {
         let mut grouped: HashMap<String, Vec<&'a CapturedRequest>> = HashMap::new();
 
         for req in requests {
@@ -68,7 +71,10 @@ impl TestGenerator for PythonGenerator {
             output.push_str(")\n\n");
 
             if let Some(response) = &first_req.response {
-                output.push_str(&format!("    assert response.status_code == {}\n", response.status_code));
+                output.push_str(&format!(
+                    "    assert response.status_code == {}\n",
+                    response.status_code
+                ));
             } else {
                 output.push_str("    assert response.status_code < 500\n");
             }

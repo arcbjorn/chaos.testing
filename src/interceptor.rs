@@ -113,7 +113,10 @@ async fn handle_request(
                 headers: Default::default(),
                 body: None,
             }),
-            format!("Intercepted: {} {}\nStored with ID: {}", method, uri, request_id),
+            format!(
+                "Intercepted: {} {}\nStored with ID: {}",
+                method, uri, request_id
+            ),
         )
     };
 
@@ -152,7 +155,11 @@ async fn forward_request(
     target: &str,
 ) -> Result<(ResponseData, String)> {
     let client = reqwest::Client::new();
-    let url = format!("{}{}", target, uri.path_and_query().map(|p| p.as_str()).unwrap_or("/"));
+    let url = format!(
+        "{}{}",
+        target,
+        uri.path_and_query().map(|p| p.as_str()).unwrap_or("/")
+    );
 
     let mut req_builder = match method.as_str() {
         "GET" => client.get(&url),

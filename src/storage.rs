@@ -1,6 +1,6 @@
 use crate::models::CapturedRequest;
 use anyhow::Result;
-use rusqlite::{params, Connection};
+use rusqlite::{Connection, params};
 use std::path::Path;
 use std::sync::Mutex;
 
@@ -40,10 +40,7 @@ impl Storage {
             [],
         )?;
 
-        conn.execute(
-            "CREATE INDEX IF NOT EXISTS idx_uri ON requests(uri)",
-            [],
-        )?;
+        conn.execute("CREATE INDEX IF NOT EXISTS idx_uri ON requests(uri)", [])?;
 
         Ok(())
     }
@@ -72,10 +69,7 @@ impl Storage {
                 request.request.body.as_deref(),
                 request.response.as_ref().map(|r| r.status_code),
                 response_headers,
-                request
-                    .response
-                    .as_ref()
-                    .and_then(|r| r.body.as_deref()),
+                request.response.as_ref().and_then(|r| r.body.as_deref()),
                 request.duration_ms,
             ],
         )?;
@@ -89,7 +83,7 @@ impl Storage {
             "SELECT id, timestamp, protocol, method, uri, headers, body,
                     response_status, response_headers, response_body, duration_ms
              FROM requests
-             ORDER BY timestamp"
+             ORDER BY timestamp",
         )?;
 
         let requests = stmt.query_map([], |row| {
@@ -109,11 +103,32 @@ impl Storage {
         })?;
 
         let mut result = Vec::new();
-        for (id, timestamp, protocol, method, uri, headers_json, body,
-                      response_status, response_headers_json, response_body, duration_ms) in requests.flatten() {
+        for (
+            id,
+            timestamp,
+            protocol,
+            method,
+            uri,
+            headers_json,
+            body,
+            response_status,
+            response_headers_json,
+            response_body,
+            duration_ms,
+        ) in requests.flatten()
+        {
             let request = self.deserialize_request(
-                id, timestamp, protocol, method, uri, headers_json, body,
-                response_status, response_headers_json, response_body, duration_ms
+                id,
+                timestamp,
+                protocol,
+                method,
+                uri,
+                headers_json,
+                body,
+                response_status,
+                response_headers_json,
+                response_body,
+                duration_ms,
             )?;
             result.push(request);
         }
