@@ -13,22 +13,63 @@ Instead of parsing source code (language-specific), we intercept **protocols** (
 3. **Test Generation** - Creates idiomatic tests in your language
 4. **Chaos Replay** - Replays traffic with injected failures
 
-## Quick Start
+## Installation
 
 ```bash
-# Observe any running process
-chaos-testing observe --pid=1234 --duration=60s
+cargo install --path .
+```
 
-# Or observe by port
-chaos-testing observe --port=8080
+## Quick Start
 
-# Generate tests for your language
-chaos-testing generate --language=python --framework=pytest
-chaos-testing generate --language=go
-chaos-testing generate --language=rust
+### 1. Capture Traffic
 
-# Run chaos tests
-chaos-testing chaos --level=extreme
+Start the interceptor on a port:
+
+```bash
+# Terminal 1: Start interceptor
+chaos-testing observe --port 8080 --output my-app.db
+```
+
+Then send requests to `http://localhost:8080`:
+
+```bash
+# Terminal 2: Send test traffic
+curl http://localhost:8080/api/users
+curl http://localhost:8080/api/products/123
+curl -X POST http://localhost:8080/api/orders -d '{"item":"widget"}'
+```
+
+### 2. Generate Tests
+
+Generate tests in your preferred language:
+
+```bash
+# Python with pytest
+chaos-testing generate --input my-app.db --language python --framework pytest
+
+# Go
+chaos-testing generate --input my-app.db --language go
+
+# Rust
+chaos-testing generate --input my-app.db --language rust
+```
+
+This creates test files in the `tests/` directory:
+- Python: `tests/test_generated.py`
+- Go: `tests/test_generated.go`
+- Rust: `tests/test_generated.rs`
+
+### 3. Run Generated Tests
+
+```bash
+# Python
+cd tests && pytest test_generated.py
+
+# Go
+cd tests && go test
+
+# Rust
+cd tests && cargo test
 ```
 
 ## Supported Languages
@@ -77,8 +118,41 @@ Works with **ANY** language because it intercepts at the network level:
          └─► Chaos Engine
 ```
 
-## Status
+## Project Structure
 
-🚧 **In Active Development** 🚧
+```
+chaos-testing/
+├── src/
+│   ├── interceptor.rs    # HTTP proxy server
+│   ├── parsers/          # Protocol parsers (HTTP, SQL)
+│   ├── storage.rs        # SQLite persistence
+│   ├── models.rs         # Data structures
+│   ├── generators/       # Test code generators
+│   │   ├── python.rs
+│   │   ├── go.rs
+│   │   └── rust_gen.rs
+│   └── main.rs           # CLI entry point
+```
 
-Current focus: HTTP interception → Protocol parsing → Test generation for Python/Go/Rust
+## Features Implemented
+
+- ✅ HTTP traffic interception
+- ✅ SQLite storage for captured requests
+- ✅ HTTP/SQL protocol parsing
+- ✅ Test generation for Python/Go/Rust
+- ✅ Clean conventional commits
+- ⏳ Chaos injection (coming soon)
+- ⏳ Behavior pattern analysis (coming soon)
+
+## Development
+
+```bash
+# Build
+cargo build --release
+
+# Run
+cargo run -- observe --port 8080
+
+# Test
+cargo test
+```
