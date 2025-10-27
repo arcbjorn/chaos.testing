@@ -192,6 +192,7 @@ impl ChaosEngine {
     }
 }
 
+#[derive(Debug, Default)]
 pub struct ChaosReport {
     pub total_tests: usize,
     pub passed: usize,
@@ -229,5 +230,59 @@ impl ChaosReport {
         }
 
         println!("\n");
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn test_chaos_level_from_str() {
+        assert!(matches!(ChaosLevel::from_str("mild"), ChaosLevel::Mild));
+        assert!(matches!(
+            ChaosLevel::from_str("moderate"),
+            ChaosLevel::Moderate
+        ));
+        assert!(matches!(
+            ChaosLevel::from_str("extreme"),
+            ChaosLevel::Extreme
+        ));
+        assert!(matches!(
+            ChaosLevel::from_str("unknown"),
+            ChaosLevel::Moderate
+        ));
+    }
+
+    #[test]
+    fn test_chaos_level_failure_rate() {
+        assert_eq!(ChaosLevel::Mild.failure_rate(), 0.05);
+        assert_eq!(ChaosLevel::Moderate.failure_rate(), 0.15);
+        assert_eq!(ChaosLevel::Extreme.failure_rate(), 0.30);
+    }
+
+    #[test]
+    fn test_chaos_level_max_delay() {
+        assert_eq!(ChaosLevel::Mild.max_delay_ms(), 100);
+        assert_eq!(ChaosLevel::Moderate.max_delay_ms(), 500);
+        assert_eq!(ChaosLevel::Extreme.max_delay_ms(), 2000);
+    }
+
+    #[test]
+    fn test_chaos_report_default() {
+        let report = ChaosReport::default();
+        assert_eq!(report.total_tests, 0);
+        assert_eq!(report.passed, 0);
+        assert_eq!(report.failed, 0);
+        assert_eq!(report.chaos_injected, 0);
+        assert_eq!(report.timeouts, 0);
+        assert!(report.errors.is_empty());
+    }
+
+    #[test]
+    fn test_chaos_type_selection() {
+        let level = ChaosLevel::Moderate;
+        let rate = level.failure_rate();
+        assert!(rate > 0.0 && rate < 1.0);
     }
 }
