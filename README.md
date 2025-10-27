@@ -89,7 +89,7 @@ Top Endpoints:
 
 ### 4. Parse Queries
 
-Analyze SQL, Redis, PostgreSQL, or HTTP queries directly:
+Analyze SQL, Redis, PostgreSQL, HTTP, Kafka, or gRPC queries directly:
 
 ```bash
 # Parse SQL query
@@ -103,6 +103,12 @@ chaos-testing parse --query "SELECT name FROM products" --protocol postgres
 
 # Analyze HTTP endpoint
 chaos-testing parse --query "/api/users/123?active=true" --protocol http
+
+# Parse Kafka topic
+chaos-testing parse --query "user-events" --protocol kafka
+
+# Parse gRPC service path
+chaos-testing parse --query "/users.UserService/GetUser" --protocol grpc
 ```
 
 ### 5. Run Chaos Tests
