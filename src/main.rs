@@ -4,6 +4,9 @@ use tracing::{info, Level};
 use tracing_subscriber;
 
 mod interceptor;
+mod models;
+mod parsers;
+mod storage;
 
 #[derive(Parser)]
 #[command(name = "chaos-testing")]
@@ -100,7 +103,7 @@ async fn main() -> Result<()> {
                 info!("Intercepting traffic on port {} for {}", port, duration);
                 info!("Output: {}", output);
 
-                let interceptor = interceptor::HttpInterceptor::new(port);
+                let interceptor = interceptor::HttpInterceptor::new(port, output);
                 interceptor.start().await?;
             } else {
                 anyhow::bail!("Either --pid or --port must be specified");
