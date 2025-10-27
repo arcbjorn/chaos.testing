@@ -107,8 +107,8 @@ All stored in SQLite (`demo.db`) for analysis.
 
 After running test traffic, you should see:
 ```
-✓ Captured 6 requests
-✓ Generated tests in generated-tests/
+Captured 6 requests
+Generated tests in generated-tests/
   - Python: test_generated.py (6 tests)
   - Go: test_generated.go (6 tests)
   - Rust: test_generated.rs (6 tests)

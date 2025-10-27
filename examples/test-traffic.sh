@@ -37,4 +37,4 @@ echo "6. GET /api/health"
 curl -s "$BASE_URL/api/health" | jq .
 
 echo ""
-echo "✓ Test traffic sent!"
+echo "Test traffic sent successfully"
