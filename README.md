@@ -23,21 +23,26 @@ cargo install --path .
 
 ### 1. Capture Traffic
 
-Start the interceptor on a port:
+Start the interceptor as a proxy between your client and backend:
 
 ```bash
-# Terminal 1: Start interceptor
-chaos-testing observe --port 8080 --output my-app.db
+# Terminal 1: Start your backend on port 9000
+# (any language - Python, Go, Node.js, etc.)
+
+# Terminal 2: Start interceptor proxy
+chaos-testing observe --port 8080 --target http://localhost:9000 --output my-app.db
 ```
 
-Then send requests to `http://localhost:8080`:
+Send requests through the proxy:
 
 ```bash
-# Terminal 2: Send test traffic
+# Terminal 3: Send traffic through proxy (port 8080)
 curl http://localhost:8080/api/users
 curl http://localhost:8080/api/products/123
 curl -X POST http://localhost:8080/api/orders -d '{"item":"widget"}'
 ```
+
+The proxy forwards to your backend and captures everything!
 
 ### 2. Generate Tests
 
@@ -144,6 +149,20 @@ chaos-testing/
 - ⏳ Chaos injection (coming soon)
 - ⏳ Behavior pattern analysis (coming soon)
 
+## Demo
+
+See the full working demo in [`examples/`](examples/):
+
+```bash
+cd examples
+python demo-api.py  # Terminal 1
+chaos-testing observe --port 8080 --target http://localhost:9000  # Terminal 2
+./test-traffic.sh   # Terminal 3
+chaos-testing generate --language python  # Generate tests
+```
+
+Full instructions: [examples/README.md](examples/README.md)
+
 ## Development
 
 ```bash
@@ -151,7 +170,7 @@ chaos-testing/
 cargo build --release
 
 # Run
-cargo run -- observe --port 8080
+cargo run -- observe --port 8080 --target http://localhost:9000
 
 # Test
 cargo test
