@@ -253,6 +253,3 @@ cargo clippy --all-targets
 cargo fmt
 ```
 
-## License
-
-MIT OR Apache-2.0
