@@ -3,6 +3,8 @@ use clap::{Parser, Subcommand};
 use tracing::{info, Level};
 use tracing_subscriber;
 
+mod interceptor;
+
 #[derive(Parser)]
 #[command(name = "chaos-testing")]
 #[command(version = env!("CARGO_PKG_VERSION"))]
@@ -97,7 +99,9 @@ async fn main() -> Result<()> {
             } else if let Some(port) = port {
                 info!("Intercepting traffic on port {} for {}", port, duration);
                 info!("Output: {}", output);
-                println!("Port interception not yet implemented");
+
+                let interceptor = interceptor::HttpInterceptor::new(port);
+                interceptor.start().await?;
             } else {
                 anyhow::bail!("Either --pid or --port must be specified");
             }

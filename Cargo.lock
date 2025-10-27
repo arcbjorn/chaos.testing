@@ -148,6 +148,7 @@ dependencies = [
  "chrono",
  "clap",
  "hyper",
+ "hyper-util",
  "regex",
  "reqwest",
  "serde",
