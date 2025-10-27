@@ -64,7 +64,41 @@ This creates test files in the `tests/` directory:
 - Go: `tests/test_generated.go`
 - Rust: `tests/test_generated.rs`
 
-### 3. Run Generated Tests
+### 3. Analyze Traffic
+
+```bash
+chaos-testing analyze --input my-app.db
+```
+
+Output:
+```
+=== Traffic Analysis Report ===
+
+Overview:
+  Total Requests: 6
+  Unique Endpoints: 6
+  Avg Response Time: 45.23ms
+  Success: 6 (100.0%)
+  Errors: 0 (0.0%)
+
+Top Endpoints:
+1. GET /api/users (called 1 times)
+   Avg: 42.5ms | Min: 42ms | Max: 43ms
+   Success Rate: 100.0%
+```
+
+### 4. Run Chaos Tests
+
+```bash
+chaos-testing chaos --input my-app.db --url http://localhost:9000 --level extreme
+```
+
+Injects failures:
+- Random network delays (0-2000ms)
+- Simulated timeouts
+- Connection errors
+
+### 5. Run Generated Tests
 
 ```bash
 # Python
@@ -141,13 +175,16 @@ chaos-testing/
 
 ## Features Implemented
 
-- ✅ HTTP traffic interception
+- ✅ HTTP traffic interception with proxy forwarding
 - ✅ SQLite storage for captured requests
-- ✅ HTTP/SQL protocol parsing
+- ✅ HTTP/SQL/Redis/PostgreSQL protocol parsing
 - ✅ Test generation for Python/Go/Rust
-- ✅ Clean conventional commits
-- ⏳ Chaos injection (coming soon)
-- ⏳ Behavior pattern analysis (coming soon)
+- ✅ **Analyze command** - traffic statistics and insights
+- ✅ **Chaos engine** - replay with failure injection
+  - Network delays
+  - Timeouts
+  - Connection failures
+- ✅ Clean conventional commits (26 total)
 
 ## Demo
 
