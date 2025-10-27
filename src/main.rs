@@ -3,6 +3,7 @@ use clap::{Parser, Subcommand};
 use tracing::{info, Level};
 use tracing_subscriber;
 
+mod generators;
 mod interceptor;
 mod models;
 mod parsers;
@@ -116,10 +117,31 @@ async fn main() -> Result<()> {
             framework,
             output,
         } => {
+            use generators::TestGenerator;
+            use std::fs;
+
             info!("Generating tests from {}", input);
             info!("Target: {} ({})", language, framework.as_deref().unwrap_or("auto"));
-            info!("Output: {}", output);
-            println!("Test generation not yet implemented");
+
+            let storage = storage::Storage::new(&input)?;
+            let requests = storage.get_all_requests()?;
+
+            info!("Loaded {} captured requests", requests.len());
+
+            if requests.is_empty() {
+                println!("No requests found in capture file");
+                return Ok(());
+            }
+
+            let generator = generators::get_generator(&language, framework.as_deref())?;
+            let test_code = generator.generate(&requests)?;
+
+            fs::create_dir_all(&output)?;
+            let filename = format!("{}/test_generated.{}", output, generator.file_extension());
+            fs::write(&filename, test_code)?;
+
+            info!("Generated tests written to: {}", filename);
+            println!("✓ Generated {} tests in {}", requests.len(), filename);
         }
 
         Commands::Chaos { level, input, url } => {
