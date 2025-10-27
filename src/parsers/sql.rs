@@ -4,6 +4,7 @@ use sqlparser::ast::Statement;
 use sqlparser::dialect::GenericDialect;
 use sqlparser::parser::Parser;
 
+#[allow(dead_code)]
 pub struct SqlParser;
 
 impl SqlParser {
@@ -64,7 +65,7 @@ impl SqlParser {
                 let mut tables = Vec::new();
                 if let Some(body) = &query.body.as_select() {
                     for table in &body.from {
-                        if let Some(name) = &table.relation.to_string().split('.').last() {
+                        if let Some(name) = &table.relation.to_string().split('.').next_back() {
                             tables.push(name.to_string());
                         }
                     }

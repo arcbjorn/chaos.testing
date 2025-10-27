@@ -3,15 +3,11 @@ use crate::models::CapturedRequest;
 use anyhow::Result;
 use std::collections::HashMap;
 
-pub struct PythonGenerator {
-    framework: String,
-}
+pub struct PythonGenerator;
 
 impl PythonGenerator {
-    pub fn new(framework: &str) -> Self {
-        Self {
-            framework: framework.to_string(),
-        }
+    pub fn new(_framework: &str) -> Self {
+        Self
     }
 
     fn group_by_endpoint<'a>(&self, requests: &'a [CapturedRequest]) -> HashMap<String, Vec<&'a CapturedRequest>> {
@@ -27,11 +23,9 @@ impl PythonGenerator {
 
     fn sanitize_test_name(&self, name: &str) -> String {
         name.to_lowercase()
-            .replace('/', "_")
-            .replace('-', "_")
+            .replace(['/', '-'], "_")
             .replace('?', "")
-            .replace('&', "_")
-            .replace('=', "_")
+            .replace(['&', '='], "_")
             .trim_matches('_')
             .to_string()
     }

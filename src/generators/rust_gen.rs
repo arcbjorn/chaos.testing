@@ -23,11 +23,9 @@ impl RustGenerator {
 
     fn sanitize_test_name(&self, name: &str) -> String {
         name.to_lowercase()
-            .replace('/', "_")
-            .replace('-', "_")
+            .replace(['/', '-'], "_")
             .replace('?', "")
-            .replace('&', "_")
-            .replace('=', "_")
+            .replace(['&', '='], "_")
             .trim_matches('_')
             .to_string()
     }

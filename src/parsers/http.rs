@@ -2,6 +2,7 @@ use crate::models::{RequestData, ResponseData};
 use hyper::{HeaderMap, Method, Uri};
 use std::collections::HashMap;
 
+#[allow(dead_code)]
 pub struct HttpParser;
 
 impl HttpParser {

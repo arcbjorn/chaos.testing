@@ -1,4 +1,3 @@
-use crate::models::CapturedRequest;
 use crate::storage::Storage;
 use anyhow::Result;
 use std::collections::HashMap;

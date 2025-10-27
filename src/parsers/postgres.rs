@@ -1,5 +1,6 @@
 use crate::models::SqlQuery;
 
+#[allow(dead_code)]
 pub struct PostgresParser;
 
 impl PostgresParser {
@@ -74,7 +75,7 @@ impl PostgresParser {
     }
 
     pub fn extract_table_names(query: &str) -> Vec<String> {
-        use crate::parsers::SqlParser;
+        use crate::parsers::sql::SqlParser;
         SqlParser::extract_table_names(query)
     }
 }

@@ -109,15 +109,13 @@ impl Storage {
         })?;
 
         let mut result = Vec::new();
-        for request_result in requests {
-            if let Ok((id, timestamp, protocol, method, uri, headers_json, body,
-                      response_status, response_headers_json, response_body, duration_ms)) = request_result {
-                let request = self.deserialize_request(
-                    id, timestamp, protocol, method, uri, headers_json, body,
-                    response_status, response_headers_json, response_body, duration_ms
-                )?;
-                result.push(request);
-            }
+        for (id, timestamp, protocol, method, uri, headers_json, body,
+                      response_status, response_headers_json, response_body, duration_ms) in requests.flatten() {
+            let request = self.deserialize_request(
+                id, timestamp, protocol, method, uri, headers_json, body,
+                response_status, response_headers_json, response_body, duration_ms
+            )?;
+            result.push(request);
         }
 
         Ok(result)

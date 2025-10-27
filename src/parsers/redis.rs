@@ -1,5 +1,6 @@
 use crate::models::RedisCommand;
 
+#[allow(dead_code)]
 pub struct RedisParser;
 
 impl RedisParser {

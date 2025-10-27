@@ -110,7 +110,7 @@ impl ChaosEngine {
 
     fn should_inject_chaos(&self) -> bool {
         use rand::Rng as _;
-        let mut rng = rand::thread_rng();
+        let mut rng = rand::rng();
         let random_val: f64 = rng.random();
         random_val < self.level.failure_rate()
     }
@@ -122,7 +122,7 @@ impl ChaosEngine {
         report: &mut ChaosReport,
     ) -> Result<()> {
         use rand::Rng as _;
-        let mut rng = rand::thread_rng();
+        let mut rng = rand::rng();
         let chaos_type = rng.random_range(0..3);
 
         match chaos_type {
@@ -171,15 +171,14 @@ impl ChaosEngine {
         let response = req_builder.send().await?;
         let status = response.status();
 
-        if let Some(expected_response) = &request.response {
-            if status.as_u16() != expected_response.status_code {
+        if let Some(expected_response) = &request.response
+            && status.as_u16() != expected_response.status_code {
                 anyhow::bail!(
                     "Status mismatch: expected {}, got {}",
                     expected_response.status_code,
                     status.as_u16()
                 );
             }
-        }
 
         Ok(())
     }

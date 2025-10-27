@@ -24,7 +24,7 @@ impl GoGenerator {
     fn sanitize_test_name(&self, name: &str) -> String {
         name.split_whitespace()
             .map(|s| {
-                let s = s.replace('/', "_").replace('-', "_");
+                let s = s.replace(['/', '-'], "_");
                 let mut chars = s.chars();
                 match chars.next() {
                     None => String::new(),
