@@ -193,10 +193,76 @@ impl Storage {
         })
     }
 
-    #[allow(dead_code)]
     pub fn count_requests(&self) -> Result<i64> {
         let conn = self.conn.lock().unwrap();
         let count: i64 = conn.query_row("SELECT COUNT(*) FROM requests", [], |row| row.get(0))?;
         Ok(count)
+    }
+
+    pub fn get_requests_by_endpoint(&self, endpoint: &str) -> Result<Vec<CapturedRequest>> {
+        let conn = self.conn.lock().unwrap();
+        let mut stmt = conn.prepare(
+            "SELECT id, timestamp, protocol, method, uri, headers, body,
+                    response_status, response_headers, response_body, duration_ms
+             FROM requests
+             WHERE uri = ?1
+             ORDER BY timestamp",
+        )?;
+
+        let requests = stmt.query_map([endpoint], |row| {
+            Ok((
+                row.get::<_, String>(0)?,
+                row.get::<_, String>(1)?,
+                row.get::<_, String>(2)?,
+                row.get::<_, String>(3)?,
+                row.get::<_, String>(4)?,
+                row.get::<_, String>(5)?,
+                row.get::<_, Option<Vec<u8>>>(6)?,
+                row.get::<_, Option<u16>>(7)?,
+                row.get::<_, Option<String>>(8)?,
+                row.get::<_, Option<Vec<u8>>>(9)?,
+                row.get::<_, Option<u64>>(10)?,
+            ))
+        })?;
+
+        let mut result = Vec::new();
+        for (
+            id,
+            timestamp,
+            protocol,
+            method,
+            uri,
+            headers_json,
+            body,
+            response_status,
+            response_headers_json,
+            response_body,
+            duration_ms,
+        ) in requests.flatten()
+        {
+            let request = self.deserialize_request(
+                id,
+                timestamp,
+                protocol,
+                method,
+                uri,
+                headers_json,
+                body,
+                response_status,
+                response_headers_json,
+                response_body,
+                duration_ms,
+            )?;
+            result.push(request);
+        }
+
+        Ok(result)
+    }
+
+    pub fn get_unique_endpoints(&self) -> Result<Vec<String>> {
+        let conn = self.conn.lock().unwrap();
+        let mut stmt = conn.prepare("SELECT DISTINCT uri FROM requests ORDER BY uri")?;
+        let endpoints = stmt.query_map([], |row| row.get(0))?;
+        Ok(endpoints.flatten().collect())
     }
 }
