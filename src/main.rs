@@ -75,6 +75,15 @@ enum Commands {
         #[arg(short, long, default_value = "chaos-capture.db")]
         input: String,
     },
+
+    /// Parse and analyze a query or command
+    Parse {
+        #[arg(short, long)]
+        query: String,
+
+        #[arg(short, long, default_value = "sql")]
+        protocol: String,
+    },
 }
 
 #[tokio::main]
@@ -189,6 +198,99 @@ async fn main() -> Result<()> {
             let report = analyzer.analyze()?;
 
             report.print();
+        }
+
+        Commands::Parse { query, protocol } => {
+            use parsers::http::HttpParser;
+            use parsers::postgres::PostgresParser;
+            use parsers::redis::RedisParser;
+            use parsers::sql::SqlParser;
+
+            info!("Parsing query with {} protocol", protocol);
+
+            match protocol.as_str() {
+                "sql" => {
+                    if let Some(parsed) = SqlParser::parse(&query) {
+                        let query_type = SqlParser::classify_query(&query);
+                        let tables = SqlParser::extract_table_names(&query);
+                        println!("SQL Query Analysis:");
+                        println!("  Type: {:?}", query_type);
+                        println!("  Tables: {:?}", tables);
+                        println!("  Params: {:?}", parsed.params);
+                    } else {
+                        println!("Failed to parse SQL query");
+                    }
+                }
+                "redis" => {
+                    let cmd = query.split_whitespace().next().unwrap_or("");
+                    let cmd_type = RedisParser::classify_command(cmd);
+                    let is_read_only = RedisParser::is_read_only(cmd);
+                    println!("Redis Command Analysis:");
+                    println!("  Command: {}", cmd);
+                    println!("  Type: {:?}", cmd_type);
+                    println!("  Read-only: {}", is_read_only);
+
+                    let resp_format =
+                        format!("*2\r\n$3\r\n{}\r\n$3\r\nkey\r\n", cmd.to_uppercase());
+                    if let Some(parsed) = RedisParser::parse(resp_format.as_bytes()) {
+                        println!("  Parsed RESP: {} {:?}", parsed.command, parsed.args);
+                    }
+                }
+                "postgres" => {
+                    println!("PostgreSQL Query Analysis:");
+
+                    let mut pg_query = vec![b'Q'];
+                    let query_with_null = format!("{}\0", query);
+                    let len = (query_with_null.len() + 4) as u32;
+                    pg_query.extend_from_slice(&len.to_be_bytes());
+                    pg_query.extend_from_slice(query_with_null.as_bytes());
+
+                    if let Some(msg_type) = PostgresParser::message_type(&pg_query) {
+                        println!("  Message Type: {:?}", msg_type);
+                    }
+
+                    if let Some(parsed) = PostgresParser::parse_simple_query(&pg_query) {
+                        println!("  Parsed Query: {}", parsed.query);
+                        println!("  Database: {:?}", parsed.database);
+                    }
+
+                    let tables = PostgresParser::extract_table_names(&query);
+                    if !tables.is_empty() {
+                        println!("  Tables: {:?}", tables);
+                    }
+
+                    let prepared = format!("test_stmt\0{}\0", query);
+                    let mut prep_msg = vec![b'P'];
+                    let len = (prepared.len() + 4) as u32;
+                    prep_msg.extend_from_slice(&len.to_be_bytes());
+                    prep_msg.extend_from_slice(prepared.as_bytes());
+
+                    if let Some((name, parsed)) =
+                        PostgresParser::parse_prepared_statement(&prep_msg)
+                    {
+                        println!("  Prepared Statement: {}", name);
+                        println!("  Query: {}", parsed.query);
+                    }
+                }
+                "http" => {
+                    use hyper::{HeaderMap, Method, Uri};
+                    let uri: Uri = query.parse()?;
+                    let method = Method::GET;
+                    let headers = HeaderMap::new();
+                    let pattern = HttpParser::extract_endpoint_pattern(&uri);
+                    let request = HttpParser::parse_request(&method, &uri, &headers, None);
+                    println!("HTTP Request Analysis:");
+                    println!("  Endpoint Pattern: {}", pattern);
+                    println!("  Query Params: {:?}", request.query_params);
+
+                    let response = HttpParser::parse_response(200, &headers, None);
+                    println!("  Response Status: {}", response.status_code);
+                }
+                _ => {
+                    println!("Unknown protocol: {}", protocol);
+                    println!("Supported: sql, redis, postgres, http");
+                }
+            }
         }
     }
 
